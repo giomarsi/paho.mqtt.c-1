@@ -52,6 +52,7 @@ SET(common_src
     Base64.c
     SHA1.c
     WebSocket.c
+    time-monotonic.c
     )
 
 IF (WIN32)
