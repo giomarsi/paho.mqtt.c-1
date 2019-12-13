@@ -64,6 +64,7 @@
 #include "Heap.h"
 #include "OsWrapper.h"
 #include "WebSocket.h"
+#include "monotonic-time.h"
 
 #define URI_TCP "tcp://"
 #define URI_WS  "ws://"
@@ -1296,7 +1297,7 @@ static void MQTTAsync_writeComplete(int socket, int rc)
 	{
 		MQTTAsyncs* m = (MQTTAsyncs*)(found->content);
 
-		time(&(m->c->net.lastSent));
+		monotonic_time(&(m->c->net.lastSent));
 
 		/* see if there is a pending write flagged */
 		if (m->pending_write)
@@ -1802,7 +1803,7 @@ static void MQTTAsync_checkTimeouts(void)
 	time_t now;
 
 	FUNC_ENTRY;
-	time(&(now));
+	monotonic_time(&(now));
 	if (difftime(now, last) < 3)
 		goto exit;
 
@@ -3571,10 +3572,12 @@ static void MQTTAsync_retry(void)
 	time_t now;
 
 	FUNC_ENTRY;
-	time(&(now));
+	monotonic_time(&(now));
+
 	if (difftime(now, last) > retryLoopInterval)
 	{
-		time(&(last));
+		monotonic_time(&(last));
+
 		MQTTProtocol_keepalive(now);
 		MQTTProtocol_retry(now, 1, 0);
 	}

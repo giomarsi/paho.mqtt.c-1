@@ -38,6 +38,7 @@
 #include <string.h>
 
 #include "Heap.h"
+#include "monotonic-time.h"
 
 #if !defined(min)
 #define min(A,B) ( (A) < (B) ? (A):(B))
@@ -159,7 +160,7 @@ void* MQTTPacket_Factory(int MQTTVersion, networkHandles* net, int* error)
 		}
 	}
 	if (pack)
-		time(&(net->lastReceived));
+		monotonic_time(&(net->lastReceived));
 exit:
 	FUNC_EXIT_RC(*error);
 	return pack;
@@ -208,7 +209,7 @@ int MQTTPacket_send(networkHandles* net, Header header, char* buffer, size_t buf
 	rc = WebSocket_putdatas(net, &buf[ws_header], buf0len, count, &buffer, &buflen, &freeData);
 
 	if (rc == TCPSOCKET_COMPLETE)
-		time(&(net->lastSent));
+		monotonic_time(&(net->lastSent));
 	
 	if (rc != TCPSOCKET_INTERRUPTED)
 	  free(buf);
@@ -259,7 +260,7 @@ int MQTTPacket_sends(networkHandles* net, Header header, int count, char** buffe
 	rc = WebSocket_putdatas(net, &buf[ws_header], buf0len, count, buffers, buflens, frees);
 
 	if (rc == TCPSOCKET_COMPLETE)
-		time(&(net->lastSent));
+		monotonic_time(&(net->lastSent));
 	
 	if (rc != TCPSOCKET_INTERRUPTED)
 	  free(buf);

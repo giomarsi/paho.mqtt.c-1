@@ -62,6 +62,7 @@
 #include "SocketBuffer.h"
 #include "StackTrace.h"
 #include "Heap.h"
+#include "monotonic-time.h"
 
 #if defined(OPENSSL)
 #include <openssl/ssl.h>
@@ -2259,10 +2260,11 @@ static void MQTTClient_retry(void)
 	time_t now;
 
 	FUNC_ENTRY;
-	time(&(now));
+	monotonic_time(&(now));
 	if (difftime(now, last) > retryLoopInterval)
 	{
-		time(&(last));
+		monotonic_time(&(last));
+
 		MQTTProtocol_keepalive(now);
 		MQTTProtocol_retry(now, 1, 0);
 	}
@@ -2777,7 +2779,7 @@ static void MQTTClient_writeComplete(int socket, int rc)
 	{
 		MQTTClients* m = (MQTTClients*)(found->content);
 
-		time(&(m->c->net.lastSent));
+		monotonic_time(&(m->c->net.lastSent));
 	}
 	FUNC_EXIT;
 }

@@ -39,6 +39,7 @@
 #include "SocketBuffer.h"
 #include "StackTrace.h"
 #include "Heap.h"
+#include "monotonic-time.h"
 
 #if !defined(min)
 #define min(A,B) ( (A) < (B) ? (A):(B))
@@ -203,7 +204,7 @@ Messages* MQTTProtocol_createMessage(Publish* publish, Messages **mm, int qos, i
 	m->MQTTVersion = publish->MQTTVersion;
 	if (m->MQTTVersion >= 5)
 		m->properties = MQTTProperties_copy(&publish->properties);
-	time(&(m->lastTouch));
+	monotonic_time(&(m->lastTouch));
 	if (qos == 2)
 		m->nextMessageType = PUBREC;
 	FUNC_EXIT;
@@ -449,7 +450,7 @@ int MQTTProtocol_handlePubrecs(void* pack, int sock)
 			{
 				rc = MQTTPacket_send_pubrel(pubrec->MQTTVersion, pubrec->msgId, 0, &client->net, client->clientID);
 				m->nextMessageType = PUBCOMP;
-				time(&(m->lastTouch));
+				monotonic_time(&(m->lastTouch));
 			}
 		}
 	}
@@ -692,7 +693,7 @@ static void MQTTProtocol_retries(time_t now, Clients* client, int regardless)
 				{
 					if (m->qos == 0 && rc == TCPSOCKET_INTERRUPTED)
 						MQTTProtocol_storeQoS0(client, &publish);
-					time(&(m->lastTouch));
+					monotonic_time(&(m->lastTouch));
 				}
 			}
 			else if (m->qos && m->nextMessageType == PUBCOMP)
@@ -707,7 +708,7 @@ static void MQTTProtocol_retries(time_t now, Clients* client, int regardless)
 					client = NULL;
 				}
 				else
-					time(&(m->lastTouch));
+					monotonic_time(&(m->lastTouch));
 			}
 			/* break; why not do all retries at once? */
 		}
